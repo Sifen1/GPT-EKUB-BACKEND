@@ -22,7 +22,7 @@ router.post('/start', auth('admin'), async (req, res) => {
     // ✅ Double check that names are strings
     const nameList = validUsers.map(u => u.name);
 
-    io.emit('spinnerStarted', nameList); // This is what frontend expects
+    io.emit('spinner:started', { members: validUsers }); // This is what frontend expects
 
     setTimeout(async () => {
       const winnerUser = validUsers[Math.floor(Math.random() * validUsers.length)];
@@ -34,10 +34,13 @@ router.post('/start', auth('admin'), async (req, res) => {
 
       await winner.save();
 
-      io.emit('winnerSelected', {
-        name: winner.name,
-        date: winner.dateWon
-      });
+     io.emit('spinner:result', {
+  winner: {
+    name: winner.name,
+    _id: winner.userId,
+    date: winner.dateWon
+  }
+});
     }, 4000);
 
     return res.status(200).json({ message: 'Spinner started' });
